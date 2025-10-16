@@ -20,12 +20,13 @@ model Test {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  supabaseId   String   @unique
+  email        String   @unique
+  createdAt    DateTime @default(now())
+
   // future relations:
-  // expenses  Expense[]
-  // incomes   Income[]
+  // expenses   Expense[]
+  // incomes    Income[]
 }
 

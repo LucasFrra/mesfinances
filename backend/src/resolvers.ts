@@ -1,14 +1,9 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import supabase from './supabaseClient';
 
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET as string;
 
-type RegisterArgs = {
+type AuthArgs = {
   email: string;
   password: string;
 };
@@ -19,39 +14,35 @@ export const resolvers = {
   },
 
   Mutation: {
-    register: async (parent: unknown, args: RegisterArgs) => {
-      // check if user exists
-      const existingUser = await prisma.user.findUnique({ where: { email: args.email } });
-      if (existingUser) {
-        throw new Error('User already exists');
-      }
-
-      // hash password
-      const hashedPassword = await bcrypt.hash(args.password, 10);
-
-      // create new user
-      const user = await prisma.user.create({
-        data: { email: args.email, password: hashedPassword },
+    register: async (parent: unknown, args: AuthArgs) => {
+      const { data, error } = await supabase.auth.signUp({
+        email: args.email,
+        password: args.password,
       });
 
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+      if (error) throw new Error(error.message);
+      if (!data.user) throw new Error('User creation failed');
 
-      return { token, user };
+      await prisma.user.upsert({
+        where: { supabaseId: data.user.id },
+        update: { email: data.user.email ?? args.email },
+        create: {
+          supabaseId: data.user.id,
+          email: data.user.email ?? args.email,
+        },
+      });
+
+      return data;
     },
-    login: async (parent: unknown, args: RegisterArgs) => {
-      const user = await prisma.user.findUnique({ where: { email: args.email } });
-      if (!user) {
-        throw new Error('Invalid credentials');
-      }
 
-      const validPassword = await bcrypt.compare(args.password, user.password);
-      if (!validPassword) {
-        throw new Error('Invalid credentials');
-      }
+    login: async (parent: unknown, args: AuthArgs) => {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: args.email,
+        password: args.password,
+      });
 
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
-
-      return { token, user };
+      if (error) throw new Error(error.message);
+      return data;
     },
   },
 };

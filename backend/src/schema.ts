@@ -2,12 +2,18 @@ export const typeDefs = `#graphql
   type User {
     id: ID!
     email: String!
-    createdAt: String!
   }
 
-  type AuthPayload {
-    token: String!
-    user: User!
+  type Session {
+    access_token: String
+    refresh_token: String
+    expires_in: Int
+    token_type: String
+  }
+
+  type AuthResponse {
+    user: User
+    session: Session
   }
 
   type Query {
@@ -15,7 +21,7 @@ export const typeDefs = `#graphql
   }
 
   type Mutation {
-    register(email: String!, password: String!): AuthPayload!
-    login(email: String!, password: String!): AuthPayload!
+    register(email: String!, password: String!): AuthResponse
+    login(email: String!, password: String!): AuthResponse
   }
 `;
