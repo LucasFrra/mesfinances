@@ -11,6 +11,9 @@ type AuthArgs = {
 export const resolvers = {
   Query: {
     ping: () => 'pong',
+    me: async (_: unknown, __: unknown, context: any) => {
+      return context.user;
+    },
   },
 
   Mutation: {
