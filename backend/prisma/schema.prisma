@@ -20,13 +20,49 @@ model Test {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  supabaseId   String   @unique
-  email        String   @unique
-  createdAt    DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  supabaseId String   @unique
+  email      String   @unique
+  createdAt  DateTime @default(now())
 
-  // future relations:
-  // expenses   Expense[]
+  // Relations
+  expenses   Expense[]
+  categories Category[]
   // incomes    Income[]
 }
 
+model Category {
+  id     Int          @id @default(autoincrement())
+  name   String
+  color  String?
+  icon   String?
+  type   CategoryType
+  userId String? // si null → catégorie de base (globale)
+  user   User?        @relation(fields: [userId], references: [supabaseId])
+
+  // Relations
+  expenses Expense[]
+  // incomes   Income[]
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  title       String
+  amount      Float
+  date        DateTime @default(now())
+  notes       String?
+  isRecurring Boolean  @default(false)
+  showInStats Boolean  @default(true)
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [supabaseId])
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+}
+
+enum CategoryType {
+  EXPENSE
+  INCOME
+}
