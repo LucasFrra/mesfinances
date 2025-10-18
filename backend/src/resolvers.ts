@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import supabase from './supabaseClient';
+import { seedDefaultCategories } from './utils/defaultCategories';
 
 const prisma = new PrismaClient();
 
@@ -34,6 +35,8 @@ export const resolvers = {
           email: data.user.email ?? args.email,
         },
       });
+
+      await seedDefaultCategories();
 
       return data;
     },
