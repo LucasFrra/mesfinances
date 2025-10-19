@@ -12,8 +12,19 @@ type AuthArgs = {
 export const resolvers = {
   Query: {
     ping: () => 'pong',
+
     me: async (_: unknown, __: unknown, context: any) => {
       return context.user;
+    },
+
+    getExpenses: async (_: unknown, __: unknown, context: any) => {
+      if (!context.user) throw new Error('Not authenticated');
+
+      return prisma.expense.findMany({
+        where: { userId: context.user.id },
+        include: { category: true },
+        orderBy: { date: 'desc' },
+      });
     },
   },
 
@@ -49,6 +60,35 @@ export const resolvers = {
 
       if (error) throw new Error(error.message);
       return data;
+    },
+
+    addExpense: async (_: unknown, args: any, context: any) => {
+      if (!context.user) throw new Error('Not authenticated');
+
+      const expense = await prisma.expense.create({
+        data: {
+          title: args.title,
+          amount: args.amount,
+          categoryId: args.categoryId,
+          notes: args.notes ?? null,
+          isRecurring: args.isRecurring ?? false,
+          showInStats: args.showInStats ?? true,
+          userId: context.user.id,
+        },
+        include: { category: true },
+      });
+
+      return expense;
+    },
+
+    deleteExpense: async (_: unknown, { id }: { id: number }, context: any) => {
+      if (!context.user) throw new Error('Not authenticated');
+
+      const expense = await prisma.expense.findUnique({ where: { id } });
+      if (!expense || expense.userId !== context.user.id) throw new Error('Not authorized');
+
+      await prisma.expense.delete({ where: { id } });
+      return true;
     },
   },
 };
