@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import supabase from './supabaseClient';
 import { seedDefaultCategories } from './utils/defaultCategories';
+import { expenseSchema } from './validation/expenseSchema';
 
 const prisma = new PrismaClient();
 
@@ -65,14 +66,15 @@ export const resolvers = {
     addExpense: async (_: unknown, args: any, context: any) => {
       if (!context.user) throw new Error('Not authenticated');
 
+      const parsed = expenseSchema.safeParse(args);
+      if (!parsed.success) {
+        const message = parsed.error.issues.map((i) => i.message).join(', ');
+        throw new Error(`Invalid input: ${message}`);
+      }
+
       const expense = await prisma.expense.create({
         data: {
-          title: args.title,
-          amount: args.amount,
-          categoryId: args.categoryId,
-          notes: args.notes ?? null,
-          isRecurring: args.isRecurring ?? false,
-          showInStats: args.showInStats ?? true,
+          ...parsed.data,
           userId: context.user.id,
         },
         include: { category: true },

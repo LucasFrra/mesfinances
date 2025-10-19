@@ -1,0 +1,12 @@
+import { z } from 'zod';
+
+export const expenseSchema = z.object({
+  title: z.string().min(2, 'Title must be at least 2 characters'),
+  amount: z.number().positive('Amount must be positive'),
+  categoryId: z.number().int().positive('Invalid category ID'),
+  notes: z.string().max(200, 'Notes too long').optional(),
+  isRecurring: z.boolean().optional(),
+  showInStats: z.boolean().optional(),
+});
+
+export type ExpenseInput = z.infer<typeof expenseSchema>;
