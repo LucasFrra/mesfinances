@@ -54,4 +54,14 @@ export const typeDefs = `#graphql
     ): Expense!
     deleteExpense(id: Int!): Boolean!
   }
+
+  extend type Query {
+    getCategories: [Category!]!
+  }
+
+  extend type Mutation {
+    createCategory(name: String!, color: String, icon: String, type: String!): Category!
+    updateCategory(id: Int!, name: String, color: String, icon: String): Category!
+    deleteCategory(id: Int!): Boolean!
+  }
 `;
