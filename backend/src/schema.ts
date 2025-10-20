@@ -38,12 +38,19 @@ export const typeDefs = `#graphql
   type Query {
     ping: String!
     me: User
-    getExpenses: [Expense!]!
   }
 
   type Mutation {
     register(email: String!, password: String!): AuthResponse
     login(email: String!, password: String!): AuthResponse
+  }
+
+  # Expenses
+  extend type Query {
+    getExpenses: [Expense!]!
+  }
+
+  extend type Mutation {
     addExpense(
       title: String!,
       amount: Float!,
@@ -52,9 +59,20 @@ export const typeDefs = `#graphql
       isRecurring: Boolean,
       showInStats: Boolean
     ): Expense!
+    updateExpense(
+      id: Int!, 
+      title: String, 
+      amount: Float, 
+      categoryId: Int, 
+      notes: String, 
+      isRecurring: Boolean, 
+      showInStats: Boolean
+    ): Expense!
     deleteExpense(id: Int!): Boolean!
   }
 
+
+  # Categories
   extend type Query {
     getCategories: [Category!]!
   }

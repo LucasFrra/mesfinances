@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import supabase from './supabaseClient';
 import { seedDefaultCategories } from './utils/defaultCategories';
-import { expenseSchema } from './validation/expenseSchema';
+import { expenseSchema, expenseUpdateSchema } from './validation/expenseSchema';
 import { duplicateDefaultCategoriesForUser } from './utils/duplicateCategories';
 import { categorySchema, categoryUpdateSchema } from './validation/categorySchema';
 
@@ -85,10 +85,50 @@ export const resolvers = {
         throw new Error(`Invalid input: ${message}`);
       }
 
+      const category = await prisma.category.findUnique({
+        where: { id: args.categoryId },
+      });
+
+      if (!category) throw new Error('Category not found');
+      if (category.userId !== context.user.id) {
+        throw new Error('Category not found');
+      }
+
       const expense = await prisma.expense.create({
         data: {
           ...parsed.data,
           userId: context.user.id,
+        },
+        include: { category: true },
+      });
+
+      return expense;
+    },
+
+    updateExpense: async (_: unknown, args: any, context: any) => {
+      if (!context.user) throw new Error('Not authenticated');
+
+      const parsed = expenseUpdateSchema.safeParse(args);
+      if (!parsed.success) {
+        const message = parsed.error.issues.map((i) => i.message).join(', ');
+        throw new Error(`Invalid input: ${message}`);
+      }
+
+      const existing = await prisma.expense.findUnique({
+        where: { id: args.id },
+      });
+      if (!existing) throw new Error('Expense not found');
+      if (existing.userId !== context.user.id) throw new Error('Not authorized');
+
+      const expense = await prisma.expense.update({
+        where: { id: args.id },
+        data: {
+          title: args.title ?? existing.title,
+          amount: args.amount ?? existing.amount,
+          categoryId: args.categoryId ?? existing.categoryId,
+          notes: args.notes ?? existing.notes,
+          isRecurring: args.isRecurring ?? existing.isRecurring,
+          showInStats: args.showInStats ?? existing.showInStats,
         },
         include: { category: true },
       });
