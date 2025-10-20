@@ -4,6 +4,7 @@ import { seedDefaultCategories } from './utils/defaultCategories';
 import { expenseSchema, expenseUpdateSchema } from './validation/expenseSchema';
 import { duplicateDefaultCategoriesForUser } from './utils/duplicateCategories';
 import { categorySchema, categoryUpdateSchema } from './validation/categorySchema';
+import { incomeSchema, incomeUpdateSchema } from './validation/incomeSchema';
 
 const prisma = new PrismaClient();
 
@@ -24,6 +25,16 @@ export const resolvers = {
       if (!context.user) throw new Error('Not authenticated');
 
       return prisma.expense.findMany({
+        where: { userId: context.user.id },
+        include: { category: true },
+        orderBy: { date: 'desc' },
+      });
+    },
+
+    getIncomes: async (_: unknown, __: unknown, context: any) => {
+      if (!context.user) throw new Error('Not authenticated');
+
+      return prisma.income.findMany({
         where: { userId: context.user.id },
         include: { category: true },
         orderBy: { date: 'desc' },
@@ -143,6 +154,76 @@ export const resolvers = {
       if (!expense || expense.userId !== context.user.id) throw new Error('Not authorized');
 
       await prisma.expense.delete({ where: { id } });
+      return true;
+    },
+
+    addIncome: async (_: unknown, args: any, context: any) => {
+      if (!context.user) throw new Error('Not authenticated');
+
+      const parsed = incomeSchema.safeParse(args);
+      if (!parsed.success) {
+        const message = parsed.error.issues.map((i) => i.message).join(', ');
+        throw new Error(`Invalid input: ${message}`);
+      }
+
+      const category = await prisma.category.findUnique({
+        where: { id: args.categoryId },
+      });
+
+      if (!category) throw new Error('Category not found');
+      if (category.userId !== context.user.id) {
+        throw new Error('Category not found');
+      }
+
+      const income = await prisma.income.create({
+        data: {
+          ...parsed.data,
+          userId: context.user.id,
+        },
+        include: { category: true },
+      });
+
+      return income;
+    },
+
+    updateIncome: async (_: unknown, args: any, context: any) => {
+      if (!context.user) throw new Error('Not authenticated');
+
+      const parsed = incomeUpdateSchema.safeParse(args);
+      if (!parsed.success) {
+        const message = parsed.error.issues.map((i) => i.message).join(', ');
+        throw new Error(`Invalid input: ${message}`);
+      }
+
+      const existing = await prisma.income.findUnique({
+        where: { id: args.id },
+      });
+      if (!existing) throw new Error('Income not found');
+      if (existing.userId !== context.user.id) throw new Error('Not authorized');
+
+      const income = await prisma.income.update({
+        where: { id: args.id },
+        data: {
+          title: args.title ?? existing.title,
+          amount: args.amount ?? existing.amount,
+          categoryId: args.categoryId ?? existing.categoryId,
+          notes: args.notes ?? existing.notes,
+          isRecurring: args.isRecurring ?? existing.isRecurring,
+          showInStats: args.showInStats ?? existing.showInStats,
+        },
+        include: { category: true },
+      });
+
+      return income;
+    },
+
+    deleteIncome: async (_: unknown, { id }: { id: number }, context: any) => {
+      if (!context.user) throw new Error('Not authenticated');
+
+      const income = await prisma.income.findUnique({ where: { id } });
+      if (!income || income.userId !== context.user.id) throw new Error('Not authorized');
+
+      await prisma.income.delete({ where: { id } });
       return true;
     },
 

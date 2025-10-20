@@ -15,7 +15,7 @@ const startServer = async () => {
     context: createContext,
   });
 
-  console.log(`🚀 Server ready at ${url}`);
+  console.log(`Server ready at ${url}`);
 };
 
 startServer();

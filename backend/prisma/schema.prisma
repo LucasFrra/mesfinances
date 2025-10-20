@@ -28,7 +28,7 @@ model User {
   // Relations
   expenses   Expense[]
   categories Category[]
-  // incomes    Income[]
+  incomes    Income[]
 }
 
 model Category {
@@ -42,10 +42,27 @@ model Category {
 
   // Relations
   expenses Expense[]
-  // incomes   Income[]
+  incomes   Income[]
 }
 
 model Expense {
+  id          Int      @id @default(autoincrement())
+  title       String
+  amount      Float
+  date        DateTime @default(now())
+  notes       String?
+  isRecurring Boolean  @default(false)
+  showInStats Boolean  @default(true)
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [supabaseId])
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+}
+
+model Income {
   id          Int      @id @default(autoincrement())
   title       String
   amount      Float

@@ -23,6 +23,17 @@ export const typeDefs = `#graphql
     category: Category!
   }
 
+  type Income {
+    id: ID!
+    title: String!
+    amount: Float!
+    date: String!
+    notes: String
+    isRecurring: Boolean!
+    showInStats: Boolean!
+    category: Category!
+  }
+
   type Session {
     access_token: String
     refresh_token: String
@@ -69,6 +80,32 @@ export const typeDefs = `#graphql
       showInStats: Boolean
     ): Expense!
     deleteExpense(id: Int!): Boolean!
+  }
+
+  # Incomes
+  extend type Query {
+    getIncomes: [Income!]!
+  }
+
+  extend type Mutation {
+    addIncome(
+      title: String!,
+      amount: Float!,
+      categoryId: Int!,
+      notes: String,
+      isRecurring: Boolean,
+      showInStats: Boolean
+    ): Income!
+    updateIncome(
+      id: Int!, 
+      title: String, 
+      amount: Float, 
+      categoryId: Int, 
+      notes: String, 
+      isRecurring: Boolean, 
+      showInStats: Boolean
+    ): Income!
+    deleteIncome(id: Int!): Boolean!
   }
 
 
