@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import supabase from './supabaseClient';
 import { seedDefaultCategories } from './utils/defaultCategories';
 import { expenseSchema } from './validation/expenseSchema';
+import { duplicateDefaultCategoriesForUser } from './utils/duplicateCategories';
 
 const prisma = new PrismaClient();
 
@@ -39,6 +40,8 @@ export const resolvers = {
       if (error) throw new Error(error.message);
       if (!data.user) throw new Error('User creation failed');
 
+      await seedDefaultCategories();
+
       await prisma.user.upsert({
         where: { supabaseId: data.user.id },
         update: { email: data.user.email ?? args.email },
@@ -48,7 +51,7 @@ export const resolvers = {
         },
       });
 
-      await seedDefaultCategories();
+      await duplicateDefaultCategoriesForUser(data.user.id);
 
       return data;
     },
