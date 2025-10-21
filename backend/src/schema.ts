@@ -34,6 +34,33 @@ export const typeDefs = `#graphql
     category: Category!
   }
 
+  type CategoryStat {
+    categoryId: Int!
+    categoryName: String!
+    total: Float!
+  }
+
+  type MonthlySummary {
+    month: Int!
+    totalIncome: Float!
+    totalExpense: Float!
+    balance: Float!
+  }
+
+  type DashboardStats {
+    totalIncome: Float!
+    totalExpense: Float!
+    balance: Float!
+    incomeByCategory: [CategoryStat!]!
+    expenseByCategory: [CategoryStat!]!
+  }
+
+  extend type Query {
+    getMonthlyStats(month: Int!, year: Int!): DashboardStats!
+    getYearlyStats(year: Int!): [MonthlySummary!]!
+    compareMonths(monthA: Int!, monthB: Int!, year: Int!): [DashboardStats]
+  }
+
   type Session {
     access_token: String
     refresh_token: String
@@ -107,7 +134,6 @@ export const typeDefs = `#graphql
     ): Income!
     deleteIncome(id: Int!): Boolean!
   }
-
 
   # Categories
   extend type Query {

@@ -5,6 +5,12 @@ import { expenseSchema, expenseUpdateSchema } from './validation/expenseSchema';
 import { duplicateDefaultCategoriesForUser } from './utils/duplicateCategories';
 import { categorySchema, categoryUpdateSchema } from './validation/categorySchema';
 import { incomeSchema, incomeUpdateSchema } from './validation/incomeSchema';
+import { getMonthlyStatsCore } from './utils/statsHelpers';
+import {
+  monthlyStatsSchema,
+  yearlyStatsSchema,
+  compareMonthsSchema,
+} from './validation/statsSchema';
 
 const prisma = new PrismaClient();
 
@@ -48,6 +54,63 @@ export const resolvers = {
         where: { userId: context.user.id },
         orderBy: { name: 'asc' },
       });
+    },
+
+    getMonthlyStats: async (_: unknown, args: { month: number; year: number }, context: any) => {
+      if (!context.user) throw new Error('Not authenticated');
+
+      const parsed = monthlyStatsSchema.safeParse(args);
+      if (!parsed.success) {
+        const msg = parsed.error.issues.map((i) => i.message).join(', ');
+        throw new Error(`Invalid input: ${msg}`);
+      }
+
+      const { month, year } = parsed.data;
+
+      return getMonthlyStatsCore(context.user.id, month, year);
+    },
+
+    compareMonths: async (
+      _: unknown,
+      args: { monthA: number; monthB: number; year: number },
+      context: any
+    ) => {
+      if (!context.user) throw new Error('Not authenticated');
+
+      const parsed = compareMonthsSchema.safeParse(args);
+      if (!parsed.success) {
+        const msg = parsed.error.issues.map((i) => i.message).join(', ');
+        throw new Error(`Invalid input: ${msg}`);
+      }
+
+      const { monthA, monthB, year } = parsed.data;
+
+      const statsA = await getMonthlyStatsCore(context.user.id, monthA, year);
+      const statsB = await getMonthlyStatsCore(context.user.id, monthB, year);
+
+      if (!statsA || !statsB) return [];
+
+      return [statsA, statsB];
+    },
+
+    getYearlyStats: async (_: unknown, args: { year: number }, context: any) => {
+      if (!context.user) throw new Error('Not authenticated');
+
+      const parsed = yearlyStatsSchema.safeParse(args);
+      if (!parsed.success) {
+        const msg = parsed.error.issues.map((i) => i.message).join(', ');
+        throw new Error(`Invalid input: ${msg}`);
+      }
+
+      const { year } = parsed.data;
+      const results = [];
+
+      for (let month = 1; month <= 12; month++) {
+        const stats = await getMonthlyStatsCore(context.user.id, month, year);
+        results.push({ month, ...stats });
+      }
+
+      return results;
     },
   },
 
