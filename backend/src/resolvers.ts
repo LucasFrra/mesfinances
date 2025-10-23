@@ -116,6 +116,10 @@ export const resolvers = {
 
   Mutation: {
     register: async (parent: unknown, args: AuthArgs) => {
+      const existingUser = await prisma.user.findUnique({
+        where: { email: args.email },
+      });
+      if (existingUser) throw new Error('User already exists');
       const { data, error } = await supabase.auth.signUp({
         email: args.email,
         password: args.password,
@@ -126,10 +130,8 @@ export const resolvers = {
 
       await seedDefaultCategories();
 
-      await prisma.user.upsert({
-        where: { supabaseId: data.user.id },
-        update: { email: data.user.email ?? args.email },
-        create: {
+      await prisma.user.create({
+        data: {
           supabaseId: data.user.id,
           email: data.user.email ?? args.email,
         },
