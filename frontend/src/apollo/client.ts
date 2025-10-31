@@ -14,7 +14,7 @@ const httpLink = new HttpLink({
 
 // Auth link (headers dynamiques)
 const authLink = new SetContextLink((prevContext /*, operation */) => {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem("authToken");
   return {
     headers: {
       ...prevContext.headers,
