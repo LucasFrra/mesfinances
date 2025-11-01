@@ -95,6 +95,27 @@ export default function Login() {
             {loading ? "Signing in..." : "Login"}
           </Button>
 
+          <div className="flex items-center w-full my-2">
+            <div className="grow border-t border-muted"></div>
+            <span className="px-2 text-muted-foreground text-xs uppercase">
+              or
+            </span>
+            <div className="grow border-t border-muted"></div>
+          </div>
+
+          <Button
+            type="button"
+            disabled
+            className="w-full bg-muted text-muted-foreground hover:bg-muted cursor-not-allowed"
+          >
+            <img
+              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              alt="Google logo"
+              className="w-4 h-4 mr-2"
+            />
+            Continue with Google
+          </Button>
+
           {error && (
             <p className="text-red-500 text-sm text-center" role="alert">
               {error.message}
