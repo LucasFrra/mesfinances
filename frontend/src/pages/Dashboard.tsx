@@ -1,58 +1,42 @@
-import { gql } from "@apollo/client";
-import { useAuth } from "@/providers/AuthContext";
+import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@apollo/client/react";
-import { Navigate } from "react-router-dom";
-
-const ME_QUERY = gql`
-  query Me {
-    me {
-      id
-      email
-    }
-  }
-`;
-
-type MeResponse = {
-  me: {
-    id: string;
-    email: string;
-  };
-};
 
 export default function Dashboard() {
-  const { logout, isAuthenticated } = useAuth();
-  const { data, loading, error } = useQuery<MeResponse>(ME_QUERY, {
-    skip: !isAuthenticated,
-  });
-
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-
-  if (loading)
-    return (
-      <div className="flex h-screen w-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent" />
-      </div>
-    );
-
-  if (error)
-    return (
-      <div className="flex h-screen w-screen items-center justify-center">
-        <p className="text-red-500">Error: {error.message}</p>
-      </div>
-    );
-
   return (
-    <section className="h-screen w-screen flex flex-col items-center justify-center gap-4">
-      <h1 className="text-2xl font-semibold">Welcome back 👋</h1>
-      <p className="text-muted-foreground">Logged in as {data?.me.email}</p>
+    <DashboardLayout>
+      <div className="flex flex-col w-full gap-6">
+        <div>
+          <h2 className="text-2xl font-semibold text-foreground">
+            Welcome back 👋
+          </h2>
+          <p className="text-muted-foreground">
+            Here’s an overview of your finances.
+          </p>
+        </div>
 
-      <Button
-        onClick={logout}
-        className="bg-red-500 hover:bg-red-600 text-white mt-4"
-      >
-        Logout
-      </Button>
-    </section>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="rounded-xl bg-background border border-muted p-5 shadow-sm">
+            <h3 className="text-sm text-muted-foreground mb-1">Balance</h3>
+            <p className="text-2xl font-bold text-foreground">€0.00</p>
+          </div>
+
+          <div className="rounded-xl bg-background border border-muted p-5 shadow-sm">
+            <h3 className="text-sm text-muted-foreground mb-1">Expenses</h3>
+            <p className="text-2xl font-bold text-destructive">€0.00</p>
+          </div>
+
+          <div className="rounded-xl bg-background border border-muted p-5 shadow-sm">
+            <h3 className="text-sm text-muted-foreground mb-1">Income</h3>
+            <p className="text-2xl font-bold text-green-600">€0.00</p>
+          </div>
+        </div>
+
+        <div className="flex justify-end mt-4">
+          <Button disabled className="opacity-70 cursor-not-allowed">
+            View Statistics (Coming soon)
+          </Button>
+        </div>
+      </div>
+    </DashboardLayout>
   );
 }
