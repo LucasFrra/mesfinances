@@ -1,12 +1,16 @@
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import { useMonthlyStats } from "@/hooks/useMonthlyStats";
+import { useCategories } from "@/hooks/useCategories";
+import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
+import { DashboardCategories } from "@/components/dashboard/DashboardCategories";
 
 export default function Dashboard() {
   const now = new Date();
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
-
-  const { stats, loading, error } = useMonthlyStats(month, year);
+  const { stats, loading, error } = useMonthlyStats(
+    now.getMonth() + 1,
+    now.getFullYear()
+  );
+  const { categories } = useCategories();
 
   if (loading)
     return (
@@ -28,32 +32,21 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col w-full gap-6">
-        <h2 className="text-2xl font-semibold text-foreground">
-          Overview — {now.toLocaleString("default", { month: "long" })} {year}
-        </h2>
+      <div className="flex flex-col w-full gap-8">
+        <div>
+          <h2 className="text-2xl font-semibold text-foreground">
+            Overview — {now.toLocaleString("default", { month: "long" })}{" "}
+            {now.getFullYear()}
+          </h2>
+        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="rounded-xl bg-background border border-muted p-5 shadow-sm">
-            <h3 className="text-sm text-muted-foreground mb-1">Balance</h3>
-            <p className="text-2xl font-bold text-foreground">
-              {stats?.balance?.toFixed(2) ?? "0.00"} €
-            </p>
-          </div>
+        <DashboardOverview stats={stats} />
 
-          <div className="rounded-xl bg-background border border-muted p-5 shadow-sm">
-            <h3 className="text-sm text-muted-foreground mb-1">Expenses</h3>
-            <p className="text-2xl font-bold text-destructive">
-              {stats?.totalExpense?.toFixed(2) ?? "0.00"} €
-            </p>
-          </div>
-
-          <div className="rounded-xl bg-background border border-muted p-5 shadow-sm">
-            <h3 className="text-sm text-muted-foreground mb-1">Income</h3>
-            <p className="text-2xl font-bold text-green-600">
-              {stats?.totalIncome?.toFixed(2) ?? "0.00"} €
-            </p>
-          </div>
+        <div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            Categories
+          </h3>
+          <DashboardCategories categories={categories} />
         </div>
       </div>
     </DashboardLayout>
