@@ -3,6 +3,7 @@ import { useMonthlyStats } from "@/hooks/useMonthlyStats";
 import { useCategories } from "@/hooks/useCategories";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { DashboardCategories } from "@/components/dashboard/DashboardCategories";
+import { DashboardChart } from "@/components/dashboard/DashboardChart";
 
 export default function Dashboard() {
   const now = new Date();
@@ -15,7 +16,7 @@ export default function Dashboard() {
   if (loading)
     return (
       <DashboardLayout>
-        <div className="flex h-full items-center justify-center">
+        <div className="flex h-full w-full items-center justify-center">
           <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent" />
         </div>
       </DashboardLayout>
@@ -24,28 +25,36 @@ export default function Dashboard() {
   if (error)
     return (
       <DashboardLayout>
-        <p className="text-red-500 text-center">
-          Error fetching stats: {error.message}
-        </p>
+        <p className="text-red-500">Error fetching stats: {error.message}</p>
       </DashboardLayout>
     );
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col w-full gap-8">
+      <div className="flex flex-col w-full gap-12">
+        {/* Titre / mois / année */}
         <div>
-          <h2 className="text-2xl font-semibold text-foreground">
-            Overview — {now.toLocaleString("default", { month: "long" })}{" "}
+          <h2 className="text-2xl font-semibold tracking-tight">
+            {now.toLocaleString("default", { month: "long" })}{" "}
             {now.getFullYear()}
           </h2>
+          <p className="text-muted-foreground text-sm">
+            Your financial summary at a glance
+          </p>
         </div>
 
+        {/* Overview bloc */}
         <DashboardOverview stats={stats} />
 
+        {/* Chart bloc */}
         <div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">
-            Categories
-          </h3>
+          <h3 className="font-semibold text-lg mb-3">Monthly balance trend</h3>
+          <DashboardChart />
+        </div>
+
+        {/* Catégories */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">By Category</h3>
           <DashboardCategories categories={categories} />
         </div>
       </div>
