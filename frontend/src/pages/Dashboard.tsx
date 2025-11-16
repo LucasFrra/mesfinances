@@ -4,6 +4,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { DashboardCategories } from "@/components/dashboard/DashboardCategories";
 import { DashboardChart } from "@/components/dashboard/DashboardChart";
+import { DashboardCategoryPie } from "@/components/dashboard/DashboardCategoryPie";
 
 export default function Dashboard() {
   const now = new Date();
@@ -48,8 +49,8 @@ export default function Dashboard() {
 
         {/* Chart bloc */}
         <div>
-          <h3 className="font-semibold text-lg mb-3">Monthly balance trend</h3>
-          <DashboardChart />
+          <h3 className="font-semibold text-lg mb-3">Expenses by category</h3>
+          <DashboardCategoryPie stats={stats} categories={categories} />
         </div>
 
         {/* Catégories */}
