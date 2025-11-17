@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/AuthContext";
 
-type DashboardHeaderProps = {
+type HeaderProps = {
   email: string;
 };
 
-export function DashboardHeader({ email }: DashboardHeaderProps) {
+export function Header({ email }: HeaderProps) {
   const { logout } = useAuth();
 
   return (

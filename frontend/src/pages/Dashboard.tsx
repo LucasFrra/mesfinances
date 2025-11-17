@@ -5,7 +5,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { DashboardCategories } from "@/components/dashboard/DashboardCategories";
 import { DashboardCategoryPie } from "@/components/dashboard/DashboardCategoryPie";
-import { MonthNavigator } from "@/components/dashboard/MonthNavigator";
+import { MonthNavigator } from "@/components/navigation/MonthNavigator";
 
 export default function Dashboard() {
   const date = new Date();

@@ -3,7 +3,7 @@ import { useQuery } from "@apollo/client/react";
 import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthContext";
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { Header } from "@/components/common/Header";
 
 const ME_QUERY = gql`
   query Me {
@@ -48,7 +48,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <section className="bg-muted min-h-screen w-screen flex flex-col">
-      <DashboardHeader email={user.email} />
+      <Header email={user.email} />
       <main className="flex flex-col grow p-6">{children}</main>
     </section>
   );
